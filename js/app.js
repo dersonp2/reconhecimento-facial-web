@@ -1,21 +1,13 @@
-const video =
-    document.getElementById("video");
-
-const canvas =
-    document.getElementById("canvas");
-
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
 
 let detectionInterval = null;
 
-
-// ============================================================
-// INICIALIZAÇÃO
-// ============================================================
+let lastEmbedding = null;
+let faceDetected = false;
 
 async function initialize() {
-
     if (!Camera.isSupported()) {
-
         UI.setStatus(
             "Câmera não suportada neste navegador"
         );
@@ -23,27 +15,15 @@ async function initialize() {
         UI.startButton.disabled = true;
 
         return;
-
     }
 
-
-    UI.setStatus(
-        "Inicializando..."
-    );
-
+    UI.setStatus("Inicializando...");
 
     try {
-
         await Face.loadModels();
 
-        UI.setStatus(
-            "Modelos carregados"
-        );
-
-    }
-
-    catch (error) {
-
+        UI.setStatus("Modelos carregados");
+    } catch (error) {
         console.error(
             "Erro ao carregar modelos:",
             error
@@ -52,263 +32,197 @@ async function initialize() {
         UI.setStatus(
             "Erro ao carregar modelos"
         );
-
     }
-
 }
 
-
-// ============================================================
-// INICIAR CÂMERA
-// ============================================================
-
 async function startCamera() {
-
     try {
-
-        UI.setStatus(
-            "Inicializando..."
-        );
-
+        UI.setStatus("Inicializando...");
 
         await Camera.start(video);
 
-
         setupCanvas();
-
 
         UI.setCameraRunning(true);
 
+        UI.setStatus("Câmera ativada");
 
-        UI.setStatus(
-            "Câmera ativada"
-        );
-
+        resetFaceState();
 
         startDetection();
 
-    }
-
-    catch (error) {
-
+    } catch (error) {
         console.error(
             "Erro ao iniciar câmera:",
             error
         );
 
-
-        if (
-            error.name ===
-            "NotAllowedError"
-        ) {
-
+        if (error.name === "NotAllowedError") {
             UI.setStatus(
                 "Permissão da câmera negada"
             );
 
-        }
-
-        else if (
-            error.name ===
-            "NotFoundError"
-        ) {
-
+        } else if (error.name === "NotFoundError") {
             UI.setStatus(
                 "Câmera não encontrada"
             );
 
-        }
-
-        else {
-
+        } else {
             UI.setStatus(
                 "Erro ao iniciar câmera"
             );
-
         }
-
     }
-
 }
-
-
-// ============================================================
-// CONFIGURAR CANVAS
-// ============================================================
 
 function setupCanvas() {
-
-    canvas.width =
-        video.videoWidth;
-
-    canvas.height =
-        video.videoHeight;
-
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 }
-
-
-// ============================================================
-// INICIAR DETECÇÃO
-// ============================================================
 
 function startDetection() {
-
     stopDetection();
 
-
-    detectionInterval =
-        setInterval(
-            processFace,
-            150
-        );
-
+    detectionInterval = setInterval(
+        processFace,
+        150
+    );
 }
-
-
-// ============================================================
-// PARAR DETECÇÃO
-// ============================================================
 
 function stopDetection() {
-
     if (detectionInterval) {
-
-        clearInterval(
-            detectionInterval
-        );
+        clearInterval(detectionInterval);
 
         detectionInterval = null;
-
     }
-
 }
 
-
-// ============================================================
-// PROCESSAR ROSTO
-// ============================================================
-
 async function processFace() {
-
     if (
         !video.videoWidth ||
         !video.videoHeight
     ) {
-
         return;
-
     }
 
-
     try {
-
-        const detection =
-            await Face.detect(video);
-
+        const detection = await Face.detect(video);
 
         Face.draw(
             canvas,
             detection
         );
 
-
-        // ====================================================
-        // NENHUM ROSTO
-        // ====================================================
-
         if (!detection) {
-
-            UI.setStatus(
-                "Nenhum rosto detectado"
-            );
+            handleNoFace();
 
             return;
-
         }
 
+        handleFaceDetected(detection);
 
-        // ====================================================
-        // ROSTO DETECTADO
-        // ====================================================
-
-        UI.setStatus(
-            "Rosto detectado"
-        );
-
-
-        // ====================================================
-        // EMBEDDING
-        // ====================================================
-
-        const embedding =
-            Face.getEmbedding(
-                detection
-            );
-
-
-        UI.setStatus(
-            "Embedding gerado"
-        );
-
-
-        console.log(
-            "======================================"
-        );
-
-        console.log(
-            "EMBEDDING FACIAL GERADO"
-        );
-
-        console.log(
-            "Dimensão:",
-            embedding.length
-        );
-
-        console.log(
-            embedding
-        );
-
-        console.log(
-            "======================================");
-
-    }
-
-    catch (error) {
-
+    } catch (error) {
         console.error(
             "Erro no processamento facial:",
             error
         );
-
     }
-
 }
 
+function handleNoFace() {
+    if (faceDetected) {
+        console.log(
+            "Rosto saiu da câmera."
+        );
+    }
 
-// ============================================================
-// PARAR CÂMERA
-// ============================================================
+    faceDetected = false;
+
+    lastEmbedding = null;
+
+    UI.setStatus(
+        "Nenhum rosto detectado"
+    );
+}
+
+function handleFaceDetected(detection) {
+    const confidence =
+        Face.getConfidence(detection);
+
+    const confidencePercent =
+        Math.round(confidence * 100);
+
+    UI.setStatus(
+        `Rosto detectado - ${confidencePercent}%`
+    );
+
+    /*
+     * Se já existe um rosto sendo acompanhado,
+     * não precisamos gerar outro embedding.
+     */
+    if (faceDetected) {
+        return;
+    }
+
+    faceDetected = true;
+
+    const embedding =
+        Face.getEmbedding(detection);
+
+    lastEmbedding = embedding;
+
+    UI.setStatus(
+        "Embedding gerado"
+    );
+
+    console.log(
+        "======================================"
+    );
+
+    console.log(
+        "NOVO ROSTO DETECTADO"
+    );
+
+    console.log(
+        "Confiança:",
+        `${confidencePercent}%`
+    );
+
+    console.log(
+        "Dimensão:",
+        embedding.length
+    );
+
+    console.log(
+        "Embedding:",
+        embedding
+    );
+
+    console.log(
+        "======================================"
+    );
+}
+
+function resetFaceState() {
+    faceDetected = false;
+    lastEmbedding = null;
+}
 
 function stopCamera() {
-
     stopDetection();
 
     Camera.stop(video);
 
     Face.clear(canvas);
 
+    resetFaceState();
+
     UI.setCameraRunning(false);
 
     UI.setStatus(
         "Câmera parada"
     );
-
 }
-
-
-// ============================================================
-// EVENTOS
-// ============================================================
 
 UI.startButton.addEventListener(
     "click",
@@ -319,10 +233,5 @@ UI.stopButton.addEventListener(
     "click",
     stopCamera
 );
-
-
-// ============================================================
-// START
-// ============================================================
 
 initialize();
