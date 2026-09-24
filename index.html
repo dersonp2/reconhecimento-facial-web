@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -8,39 +7,99 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Reconhecimento Facial</title>
+    <title>Reconhecimento Facial Web</title>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
 
 </head>
 
 <body>
 
-    <main class="container">
+    <main class="app">
 
-        <h1>Reconhecimento Facial</h1>
+        <!-- HEADER -->
 
-        <section class="camera-container">
+        <header class="header">
 
-            <video
-                id="video"
-                autoplay
-                muted
-                playsinline
-            ></video>
+            <div>
+                <h1>Reconhecimento Facial</h1>
 
-            <canvas id="canvas"></canvas>
-
-        </section>
-
-        <section class="status-container">
-
-            <div class="status-label">
-                Status
+                <p>
+                    POC de reconhecimento facial web
+                </p>
             </div>
+
+        </header>
+
+
+        <!-- NAVEGAÇÃO -->
+
+        <nav class="navigation">
+
+            <button
+                id="recognitionButton"
+                class="nav-button active"
+            >
+                🎥 Reconhecer
+            </button>
+
+            <button
+                id="registrationButton"
+                class="nav-button"
+            >
+                👤 Cadastrar pessoa
+            </button>
+
+        </nav>
+
+
+        <!-- ================================= -->
+        <!-- TELA DE RECONHECIMENTO             -->
+        <!-- ================================= -->
+
+        <section
+            id="recognitionScreen"
+            class="screen"
+        >
+
+            <div class="screen-header">
+
+                <div>
+
+                    <h2>Reconhecimento</h2>
+
+                    <p>
+                        Posicione seu rosto diante da câmera.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="camera-card">
+
+                <div class="camera-container">
+
+                    <video
+                        id="video"
+                        autoplay
+                        muted
+                        playsinline
+                    ></video>
+
+                    <canvas id="canvas"></canvas>
+
+                </div>
+
+            </div>
+
 
             <div
                 id="status"
@@ -49,37 +108,180 @@
                 Inicializando...
             </div>
 
+
+            <div class="actions">
+
+                <button
+                    id="startButton"
+                    class="button primary"
+                >
+                    Iniciar câmera
+                </button>
+
+                <button
+                    id="stopButton"
+                    class="button secondary"
+                    disabled
+                >
+                    Parar câmera
+                </button>
+
+            </div>
+
         </section>
 
-        <section class="buttons">
 
-            <button id="startButton">
-                Iniciar câmera
-            </button>
+        <!-- ================================= -->
+        <!-- TELA DE CADASTRO                   -->
+        <!-- ================================= -->
 
-            <button
-                id="stopButton"
-                disabled
-            >
-                Parar câmera
-            </button>
+        <section
+            id="registrationScreen"
+            class="screen hidden"
+        >
+
+            <div class="screen-header">
+
+                <div>
+
+                    <h2>Cadastrar pessoa</h2>
+
+                    <p>
+                        Cadastre o rosto de uma pessoa.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="registration-layout">
+
+
+                <!-- FORMULÁRIO -->
+
+                <div class="registration-form">
+
+                    <label for="personName">
+                        Nome
+                    </label>
+
+                    <input
+                        type="text"
+                        id="personName"
+                        placeholder="Digite o nome"
+                        autocomplete="off"
+                    >
+
+                    <div
+                        id="registrationStatus"
+                        class="status"
+                    >
+                        Informe o nome e inicie a câmera.
+                    </div>
+
+                    <div class="actions">
+
+                        <button
+                            id="registrationStartButton"
+                            class="button primary"
+                        >
+                            Iniciar câmera
+                        </button>
+
+                        <button
+                            id="registerButton"
+                            class="button success"
+                            disabled
+                        >
+                            Cadastrar rosto
+                        </button>
+
+                        <button
+                            id="registrationStopButton"
+                            class="button secondary"
+                            disabled
+                        >
+                            Parar câmera
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CÂMERA -->
+
+                <div class="camera-card">
+
+                    <div class="camera-container">
+
+                        <video
+                            id="registrationVideo"
+                            autoplay
+                            muted
+                            playsinline
+                        ></video>
+
+                        <canvas
+                            id="registrationCanvas"
+                        ></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PESSOAS CADASTRADAS -->
+
+            <div class="people-section">
+
+                <div class="section-title">
+
+                    <h3>
+                        Pessoas cadastradas
+                    </h3>
+
+                    <span id="peopleCount">
+                        0
+                    </span>
+
+                </div>
+
+                <div id="peopleList">
+
+                    <div class="empty-state">
+
+                        Nenhuma pessoa cadastrada.
+
+                    </div>
+
+                </div>
+
+            </div>
 
         </section>
-
-        <p class="info">
-            O processamento facial acontece localmente no navegador.
-        </p>
 
     </main>
 
 
-    <!-- Biblioteca de reconhecimento facial -->
-    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <!-- FACE API -->
 
-    <!-- Módulos da aplicação -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"
+    ></script>
+
+
+    <!-- PROJETO -->
+
     <script src="js/ui.js"></script>
     <script src="js/camera.js"></script>
     <script src="js/face.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/person.js"></script>
+    <script src="js/recognition.js"></script>
     <script src="js/app.js"></script>
 
 </body>
