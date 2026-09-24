@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>Reconhecimento Facial</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+    <main class="container">
+
+        <h1>Reconhecimento Facial</h1>
+
+        <section class="camera-container">
+
+            <video
+                id="video"
+                autoplay
+                muted
+                playsinline
+            ></video>
+
+            <canvas id="canvas"></canvas>
+
+        </section>
+
+        <section class="status-container">
+
+            <div class="status-label">
+                Status
+            </div>
+
+            <div
+                id="status"
+                class="status"
+            >
+                Inicializando...
+            </div>
+
+        </section>
+
+        <section class="buttons">
+
+            <button id="startButton">
+                Iniciar câmera
+            </button>
+
+            <button
+                id="stopButton"
+                disabled
+            >
+                Parar câmera
+            </button>
+
+        </section>
+
+        <p class="info">
+            O processamento facial acontece localmente no navegador.
+        </p>
+
+    </main>
+
+
+    <!-- Biblioteca de reconhecimento facial -->
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+
+    <!-- Módulos da aplicação -->
+    <script src="js/ui.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/face.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
